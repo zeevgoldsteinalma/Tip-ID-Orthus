@@ -17,17 +17,21 @@
 // Tip IDs:
 typedef enum
 {
-    FOCUS               = 1,    // {1 - 9}
-    PIXEL_694           = 10,
-    PIXEL_1064          = 11,   // {11 - 15}
-    VASQULAR            = 16,   // {16 - 24}
-    PEN_LIKE            = 25    // {25 - 27}
+    FOCUS               = 1,    // {1 - 9}, 4 Optocouplers, no thermistor
+    PIXEL_694           = 10,   // {10}   , 0 Optocouplers, no thermistor
+    PIXEL_1064          = 11,   // {11 - 15}, 3 Optocouplers, no thermistor
+    VASQULAR            = 16,   // {16 - 24}, 4 Optocouplers, 1 - thermistor
+    PEN_LIKE            = 25    // {25 - 27}, 2 Optocouplers, no thermistor
 } tip_id_t;
 
 //*****************************************************************************
 
 // -> Choose a constant  base tip ID: FOCUS,PIXEL_694,PIXEL_1064,VASQULAR,PEN_LIKE
 #define SELECT_TIPID    FOCUS
+
+// ADC configuration:
+#define OPTOCOUPLER_CHANNELS 4   // Number of channels to read (usually 4)
+#define ADC_HYST             2   // Hysteresis, ADC steps above & below threshold
 
 // Uncomment for the new PCB 2.0 (tested with FemiLift):
 #define NEW_PCB
@@ -43,10 +47,6 @@ typedef enum
 // Tip IDs to send with temperature sensor:
 #define ID_TEMP_LOW         13  // Value to send below temp. threshold
 #define ID_TEMP_HIGH        15  // Value to send above temp. threshold
-
-// ADC configuration:
-#define ADC_CHANS           4   // Number of channels to read (usually 4)
-#define ADC_HYST            2   // Hysteresis, ADC steps above & below threshold
 
 // 1.0 ms delay - change to fine-tune the pulse frequency:
 #define DELAY_MS            150

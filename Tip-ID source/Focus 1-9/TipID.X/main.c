@@ -40,6 +40,8 @@
 #include <xc.h>
 #include "func.h"
 
+uint8_t gray_code[9] = {0,1,3,2,6,7,5,4,12};
+uint8_t index_gray_code[16] = {0,1,3,2,6,7,4,5,0xFF,0xFF,0xFF,0xFF,8,0xFF,0xFF,0xFF};
 
 /******************************************************************************
  * Main program
@@ -51,7 +53,7 @@ void main(void)
     
     // Variables:
     uint8_t bit_val;
-    uint8_t ch_read_result[ADC_CHANS] = {0};
+    uint8_t ch_read_result[OPTOCOUPLER_CHANNELS] = {0};
     uint8_t val_to_send = 0;
     
     // GPIO configuration:
@@ -88,12 +90,12 @@ void main(void)
     // Infinite loop:
     while (1)
     {
-        ADC_ReadChannels(0, 3, ch_read_result); // Read ADC channels
+        ADC_ReadChannels(0, (OPTOCOUPLER_CHANNELS - 1), ch_read_result); // Read ADC channels
                 
         // Convert bit values into a byte:
         val_to_send = 0;
         bit_val = 1;
-        for (uint8_t i=0; i<ADC_CHANS; i++)
+        for (uint8_t i=0; i<OPTOCOUPLER_CHANNELS; i++)
         {
             if (ch_read_result[i] == 1)
             {
@@ -101,66 +103,10 @@ void main(void)
             }
             bit_val <<= 1;
         }
-        val_to_send += selected_id;
+        val_to_send = index_gray_code[val_to_send] + selected_id;
 
         Delay_ms(26);   // Delay before sending the value
-        /*switch (selected_id)
-        {
-            // Read optocouplers:
-            case SENSORS_1234:
-            case SENSORS_5678:
-            case SENSORS_RAW:
-            //*****************************************************************
-                ADC_ReadChannels(0, 3, ch_read_result); // Read ADC channels
-                
-                // Convert bit values into a byte:
-                uint8_t new_val_to_send = 0;
-                uint8_t bit_val = 1;
-                for (uint8_t i=0; i<ADC_CHANS; i++)
-                {
-                    if (ch_read_result[i] == 1)
-                        new_val_to_send += bit_val;
 
-                    bit_val <<= 1;
-                }
-                
-                if (selected_id == SENSORS_RAW)
-                {
-                    // Send the byte as is:
-                    val_to_send = new_val_to_send;
-                }
-                else
-                {
-                    // Update only when a valid value is present:
-                    switch (new_val_to_send)
-                    {
-                        case 1:
-                        case 2:
-                        case 3:
-                        case 4:
-                            val_to_send = new_val_to_send;
-                            if (selected_id == SENSORS_5678)
-                                val_to_send += 4;   // {1,2,3,4} -> {5,6,7,8}
-                    }                
-                }
-                Delay_ms(26);   // Delay before sending the value
-                break;
-
-            // Read temperature sensor:
-            case PROSCAN_T_SENSOR:
-            //*****************************************************************
-                // Read ADC channel 0 (GP0):
-                ADC_ReadChannels(0, 0, ch_read_result); // Read ADC channels
-                val_to_send = (ch_read_result[0])? ID_TEMP_LOW : ID_TEMP_HIGH;
-
-                Delay_ms(29);   // Delay before sending the value
-                break;
-
-            // Wait before sending constant tip ID:
-            default:
-            //*****************************************************************
-                Delay_ms(30);   // Delay before sending the value
-        }*/
         //*********************************************************************
         Send_Sequence(val_to_send, 6);  // Send the result
     }
